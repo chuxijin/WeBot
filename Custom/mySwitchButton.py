@@ -1,6 +1,5 @@
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal
-from PyQt5.QtGui import QPainter, QColor, QMouseEvent, QPaintEvent, QResizeEvent, QPixmap
+from BasicDefine import *
+
 
 class MySwitchControl(QWidget):
     toggled = pyqtSignal(bool)
@@ -67,7 +66,8 @@ class MySwitchControl(QWidget):
         # Thumb
         thumb_color = self.thumb_color
         painter.setBrush(thumb_color)
-        painter.drawEllipse(self.thumb_position, self.margin, self.height() - 2*self.margin, self.height() - 2*self.margin)
+        painter.drawEllipse(self.thumb_position, self.margin, self.height() - 2 * self.margin,
+                            self.height() - 2 * self.margin)
 
     def mousePressEvent(self, event: QMouseEvent):
         if self.isEnabled() and event.button() == Qt.LeftButton:
