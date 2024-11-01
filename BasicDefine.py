@@ -1,6 +1,11 @@
 import sys
 import os
 import json
+import time
+import requests
+import asyncio
+import aiohttp
+
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
     QPushButton, QTableWidget, QTableWidgetItem, QCheckBox, QLabel,
@@ -19,7 +24,7 @@ from PyQt5.QtGui import (
 __all__ = \
     [
         # 系统库
-        'sys', 'json', 'os',
+        'sys', 'json', 'os', 'time', 'requests', 'asyncio', 'aiohttp',
         # Qt库
         'QApplication', 'QWidget', 'QVBoxLayout', 'QHBoxLayout', 'QTableWidget', 'QPushButton', 'QTabWidget', 'QDialog',
         'QTableWidgetItem', 'QCheckBox', 'QLabel', 'QTextEdit', 'QLineEdit', 'QGroupBox', 'QFileDialog', 'QGridLayout',

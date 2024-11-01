@@ -1,0 +1,8 @@
+{
+    "reply_interval_seconds": 5,
+    "fetch_interval_seconds": 10,
+    "keyword_responses": {
+        "hello": "Hi! How can I help you?",
+        "bye": "Goodbye! See you next time!"
+    }
+}
