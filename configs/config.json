@@ -1,15 +1,8 @@
 {
-  "reply_interval_seconds": 5,
-  "fetch_interval_seconds": 10,
-  "keyword_responses": {
-    "hello": "Hi! How can I help you?",
-    "bye": "Goodbye! See you next time!"
-  },
-  "accounts": [
-    {"account": "user1", "wx_name": "weixin1", "port": "1234"},
-    {"account": "user2", "wx_name": "weixin2", "port": "2345"}
-  ],
-  "friend_approval_interval_seconds": 10,
-  "approval_message": "Thank you for adding me!",
-  "approval_image": "path/to/image.png"
+    "auto_approve": true,
+    "auto_reject": false,
+    "reject_keywords": [],
+    "auto_reply": false,
+    "reply_text": "",
+    "reply_image": ""
 }

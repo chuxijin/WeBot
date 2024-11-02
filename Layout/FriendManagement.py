@@ -156,8 +156,7 @@ class FriendManagementTab(QWidget):
         self.total_label.setText(f"好友申请总计: {total}")
 
     def load_config(self):
-        config_path = os.path.join('configs', 'config.json')
-        with open(config_path, 'r') as f:
+        with open(CONFIG_FILE, 'r') as f:
             self.config = json.load(f)
 
     async def fetch_new_requests(self):

@@ -1,5 +1,5 @@
 from BasicDefine import *
-CONFIG_FILE = os.path.join('configs', 'config.json')
+from DataManager import *
 
 
 class AccountManagementTab(QWidget):
