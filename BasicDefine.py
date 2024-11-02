@@ -14,7 +14,9 @@ import time
 import requests
 import asyncio
 import aiohttp
-
+import hashlib
+from PIL import Image
+import mimetypes
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
     QPushButton, QTableWidget, QTableWidgetItem, QCheckBox, QLabel,
@@ -33,7 +35,7 @@ from PyQt5.QtGui import (
 __all__ = \
     [
         # 系统库
-        'sys', 'json', 'os', 'time', 'requests', 'asyncio', 'aiohttp',
+        'sys', 'json', 'os', 'time', 'requests', 'asyncio', 'aiohttp', 'hashlib', 'Image', 'mimetypes',
         # Qt库
         'QApplication', 'QWidget', 'QVBoxLayout', 'QHBoxLayout', 'QTableWidget', 'QPushButton', 'QTabWidget', 'QDialog',
         'QTableWidgetItem', 'QCheckBox', 'QLabel', 'QTextEdit', 'QLineEdit', 'QGroupBox', 'QFileDialog', 'QGridLayout',

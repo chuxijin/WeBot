@@ -7,6 +7,7 @@ from Layout.MessageManagement import *
 from Layout.MomentsManagement import *
 from Layout.MomentsContentConfig import *
 
+
 class WeChatBotManager(QWidget):
     def __init__(self):
         super().__init__()

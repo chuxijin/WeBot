@@ -9,3 +9,5 @@
 
 from BasicDefine import *
 CONFIG_FILE = os.path.join('configs', 'config.json')
+headers = {"Content-Type": "application/json"}
+url = " http://127.0.0.1:8888/api/"
