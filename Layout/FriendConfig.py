@@ -78,6 +78,7 @@ class FriendConfigDialog(QDialog):
             self.selected_image.setText(file_path)
 
     def get_config(self):
+
         reject_keywords = self.reject_keyword_edit.toPlainText().strip().split('\n')
         reject_keywords = [kw.strip() for kw in reject_keywords if kw.strip()]
 
@@ -91,7 +92,11 @@ class FriendConfigDialog(QDialog):
         }
 
     def save_config(self):
+        old_config = {}
+        with open(CONFIG_FILE, 'r') as file:
+            old_config = json.load(file)
         config = self.get_config()
+        config.update(old_config)
         try:
             with open(CONFIG_FILE, 'w') as file:
                 json.dump(config, file, indent=4, ensure_ascii=False)
