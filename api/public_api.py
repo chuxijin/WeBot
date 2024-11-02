@@ -73,3 +73,24 @@ def determine_file_type(file_path):
     except Exception as e:
         print(f"发生错误: {e}")
         return 5
+
+
+def public_request(request_data: dict):
+    try:
+        # 发送POST请求
+        response = requests.post(url, data=json.dumps(request_data), headers=headers)
+        # 检查响应状态码
+        if response.status_code == 200:
+            # 解析JSON响应
+            result = response.json()
+            # 提取并输出需要的数据
+            data = result.get("data", {})
+            return data
+
+        else:
+            print(f"请求失败，状态码: {response.status_code}")
+            return {}
+
+    except requests.RequestException as e:
+        print(f"请求时发生错误: {e}")
+        return {}
