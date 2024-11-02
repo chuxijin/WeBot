@@ -1,4 +1,3 @@
-from BasicDefine import *
 from Layout.MomentsContentConfig import *
 
 
@@ -6,34 +5,49 @@ class MomentsManagementTab(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.module_contents = {}  # 存储各模块的朋友圈内容
+        self.module_contents = {}
+        self.modules = ["模块A", "模块B", "模块C"]
+        self.module_buttons = {}
+        self.updateModuleButtons()
 
     def initUI(self):
         layout = QHBoxLayout(self)
 
-        # 左侧模块按钮区域
-        modules_layout = QVBoxLayout()
-        self.modules = ["模块A", "模块B", "模块C"]  # 预留模块名称
-        self.module_buttons = {}
-        for module in self.modules:
-            btn_layout = QHBoxLayout()
-            btn = QPushButton(module)
-            btn.setIcon(QIcon("icons/module.png"))
-            btn.clicked.connect(lambda checked, m=module: self.select_module(m))
-            settings_btn = QPushButton("...")
-            settings_btn.setFixedSize(20, 20)
-            settings_btn.setIcon(QIcon("icons/settings.png"))
-            settings_btn.clicked.connect(lambda checked, m=module: self.configure_module(m))
-            btn_layout.addWidget(btn)
-            btn_layout.addWidget(settings_btn)
-            btn_layout.addStretch()
-            modules_layout.addLayout(btn_layout)
-            self.module_buttons[module] = btn
+        # Left side module button area
+        scroll_area = QScrollArea(self)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area_widget = QWidget(scroll_area)
 
-        modules_layout.addStretch()
-        layout.addLayout(modules_layout)
+        self.modules_layout = QVBoxLayout(scroll_area_widget)
+        self.modules_layout.setSpacing(15)
+        self.modules_layout.setContentsMargins(10, 20, 10, 10)
 
-        # 右侧朋友圈管理内容
+        scroll_area.setWidget(scroll_area_widget)
+        scroll_area.setFixedWidth(140)
+        layout.addWidget(scroll_area)
+        add_module_button = QPushButton("+")
+        add_module_button.setFixedSize(30, 30)
+
+        add_module_button.setStyleSheet("""
+                    QPushButton {
+                        background-color: #FF0000;  # Bright red color
+                        color: white;
+                        font-weight: bold;
+                        border-radius: 15px;
+                    }
+                    QPushButton:hover {
+                        background-color: #FF3333;  # Lighter red on hover
+                    }
+                    QPushButton:pressed {
+                        background-color: #CC0000;  # Darker red when pressed
+                    }
+                """)
+        add_module_button.clicked.connect(self.add_module)
+        self.modules_layout.addWidget(add_module_button, alignment=Qt.AlignCenter)
+
+        # Right-side moments management content
         moments_management_layout = QVBoxLayout()
 
         # Account info
@@ -123,8 +137,66 @@ class MomentsManagementTab(QWidget):
 
         layout.addLayout(moments_management_layout)
 
+    def add_module(self):
+        # 添加新模块逻辑
+        new_module_name = f"新模块{len(self.modules) + 1}"
+        self.modules.append(new_module_name)
+        self.updateModuleButtons()
+
+    def updateModuleButtons(self):
+        # Clear existing module layout items
+        while self.modules_layout.count() > 1:
+            item = self.modules_layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+
+        # Re-add module buttons
+        for module in self.modules:
+            btn = QPushButton(module, self)
+            btn.setFixedSize(80, 80)
+            btn.setIcon(QIcon("icons/module.png"))
+            btn.setIconSize(QSize(40, 40))
+            btn.setStyleSheet("""
+                QPushButton {
+                    border: 1px solid #DDDDDD;
+                    border-radius: 10px;
+                    background-color: #F0F0F0;
+                    margin: 10px 0;  # Add fixed vertical spacing between buttons
+                }
+                QPushButton:hover {
+                    background-color: #E0E0E0;
+                }
+                QPushButton:pressed {
+                    background-color: #D0D0D0;
+                }
+            """)
+            btn.clicked.connect(lambda checked, m=module: self.configure_module(m))
+
+            # 创建关闭按钮，并放置在模块按钮的右上角
+            close_btn = QPushButton("x", btn)
+            close_btn.setFixedSize(16, 16)
+            close_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #FF0000;  # Bright red color
+                    color: white;
+                    border: none;
+                    font-size: 12px;
+                    border-radius: 8px;
+                }
+                QPushButton:hover {
+                    background-color: #FF3333;  # Lighter red on hover
+                }
+                QPushButton:pressed {
+                    background-color: #CC0000;  # Darker red when pressed
+                }
+            """)
+            close_btn.move(btn.width() - close_btn.width(), 0)
+            close_btn.clicked.connect(lambda checked, m=module: self.remove_module(m))
+
+            self.modules_layout.insertWidget(self.modules_layout.count() - 1, btn, alignment=Qt.AlignTop)
+
     def select_module(self, module):
-        # 根据选择的模块加载对应的朋友圈内容
         content = self.module_contents.get(module, {})
         self.moments_text.setPlainText(content.get("text", ""))
         image_path = content.get("image", "")
