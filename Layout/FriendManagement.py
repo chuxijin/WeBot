@@ -2,13 +2,21 @@ from BasicDefine import *
 from Layout.FriendConfig import *
 
 
+class MySwitchControl(QCheckBox):
+    def setToggle(self, state):
+        self.setChecked(state)
+
+    def isToggled(self):
+        return self.isChecked()
+
+
 class FriendManagementTab(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
         self.load_config()
 
-        # 定时器设定
+        # Timers for automated tasks.
         self.reply_timer = QTimer(self)
         self.reply_timer.timeout.connect(lambda: asyncio.ensure_future(self.auto_reply_to_friends()))
         self.reply_timer.start(self.config['reply_interval_seconds'] * 1000)
@@ -17,17 +25,19 @@ class FriendManagementTab(QWidget):
         self.fetch_timer.timeout.connect(lambda: asyncio.ensure_future(self.fetch_new_requests()))
         self.fetch_timer.start(self.config['fetch_interval_seconds'] * 1000)
 
+        self.auto_approve_timer = QTimer(self)
+        self.auto_approve_timer.timeout.connect(lambda: asyncio.ensure_future(self.auto_approve_friends()))
+        self.auto_approve_timer.start(self.config.get('friend_approval_interval_seconds', 10) * 1000)
+
         self.auto_approve = True
         self.auto_reply = True
-        self.reply_text = ""
-        self.reply_image = ""
-        self.today_approved = 0
-        self.pending_requests = 0
+        self.reply_text = self.config.get('approval_message', "")
+        self.reply_image = self.config.get('approval_image', "")
 
     def initUI(self):
         layout = QVBoxLayout(self)
 
-        # Friend requests group
+        # Friend requests group box
         requests_group = QGroupBox("好友申请")
         requests_group.setStyleSheet("""
                QGroupBox {
@@ -42,7 +52,6 @@ class FriendManagementTab(QWidget):
                }
            """)
         requests_layout = QVBoxLayout(requests_group)
-
         self.friend_requests = QTableWidget()
         self.friend_requests.setColumnCount(5)
         self.friend_requests.setHorizontalHeaderLabels(["选择", "账号", "好友账号", "备注", "操作"])
@@ -77,23 +86,10 @@ class FriendManagementTab(QWidget):
                }
            """)
 
-        # 添加全选复选框到表头
-        header = self.friend_requests.horizontalHeader()
-        self.select_all_checkbox = QCheckBox()
-        self.select_all_checkbox.stateChanged.connect(self.select_all_friends)
-        header_widget = QWidget()
-        header_layout = QHBoxLayout(header_widget)
-        header_layout.addWidget(self.select_all_checkbox)
-        header_layout.setAlignment(Qt.AlignCenter)
-        header_layout.setContentsMargins(0, 0, 0, 0)
-        self.friend_requests.setCellWidget(0, 0,
-                                           self.select_all_checkbox)  # Placeholder, will adjust after setting row count
-
         requests_layout.addWidget(self.friend_requests)
-
         layout.addWidget(requests_group)
 
-        # Statistics
+        # Statistics layout
         stats_layout = QHBoxLayout()
         self.total_label = QLabel("好友申请总计: 0")
         self.today_approved_label = QLabel("今日已通过: 0")
@@ -152,25 +148,84 @@ class FriendManagementTab(QWidget):
 
         layout.addLayout(button_layout)
 
-        # 初始化统计
+        # Initialize statistics
         self.update_statistics()
 
     def update_statistics(self):
         total = self.friend_requests.rowCount()
         self.total_label.setText(f"好友申请总计: {total}")
 
+    def load_config(self):
+        config_path = os.path.join('configs', 'config.json')
+        with open(config_path, 'r') as f:
+            self.config = json.load(f)
 
-    def select_all_friends(self, state):
+    async def fetch_new_requests(self):
+        print("Checking for new friend requests...")
+        # Simulated fetch logic - replace with your actual fetch request logic
+        new_requests = [("account1", "friend_account1", "remark1"), ("account2", "friend_account2", "remark2")]
+        for account, friend_account, remark in new_requests:
+            self.add_friend_request(account, friend_account, remark)
+
+    async def auto_approve_friends(self):
         for row in range(self.friend_requests.rowCount()):
             checkbox = self.friend_requests.cellWidget(row, 0)
-            if isinstance(checkbox, QCheckBox):
-                checkbox.setChecked(state == Qt.Checked)
+            if isinstance(checkbox, QCheckBox) and checkbox.isChecked():
+                await self.agree_friend(row)
+
+    async def agree_friend(self, row):
+        account_item = self.friend_requests.item(row, 1)
+        friend_account_item = self.friend_requests.item(row, 2)
+        if account_item and friend_account_item:
+            print(f"Approving friend request from {friend_account_item.text()} for account {account_item.text()}")
+            if self.reply_text or self.reply_image:
+                await self.send_auto_reply(friend_account_item.text(), self.reply_text, self.reply_image)
+            self.friend_requests.removeRow(row)
+
+    async def send_auto_reply(self, account, message, image_path):
+        print(f"Sending auto-reply message to {account}: {message}, with image: {image_path}")
+        api_endpoint = "http://example.com/api/sendmessage"  # Replace with actual API
+        data = {
+            "account": account,
+            "message": message,
+            "image_path": image_path
+        }
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.post(api_endpoint, json=data) as response:
+                    if response.status == 200:
+                        print("Message sent successfully!")
+                    else:
+                        print(f"Failed to send message. Status code: {response.status}")
+            except aiohttp.ClientError as e:
+                print(f"An error occurred: {e}")
+
+    def add_friend_request(self, account, friend_account, remark=""):
+        row_position = self.friend_requests.rowCount()
+        self.friend_requests.insertRow(row_position)
+        checkbox = QCheckBox()
+        checkbox.setStyleSheet("margin-left: 20px;")
+        self.friend_requests.setCellWidget(row_position, 0, checkbox)
+        self.friend_requests.setItem(row_position, 1, QTableWidgetItem(account))
+        self.friend_requests.setItem(row_position, 2, QTableWidgetItem(friend_account))
+        self.friend_requests.setItem(row_position, 3, QTableWidgetItem(remark))
+        agree_button = QPushButton("同意")
+        refuse_button = QPushButton("拒绝")
+        agree_button.clicked.connect(lambda: asyncio.ensure_future(self.agree_friend(row_position)))
+        refuse_button.clicked.connect(lambda: self.refuse_friend(row_position))
+        op_layout = QHBoxLayout()
+        op_layout.addWidget(agree_button)
+        op_layout.addWidget(refuse_button)
+        op_layout.setContentsMargins(0, 0, 0, 0)
+        op_widget = QWidget()
+        op_widget.setLayout(op_layout)
+        self.friend_requests.setCellWidget(row_position, 4, op_widget)
 
     def approve_all_friends(self):
         for row in range(self.friend_requests.rowCount()):
             checkbox = self.friend_requests.cellWidget(row, 0)
             if isinstance(checkbox, QCheckBox) and checkbox.isChecked():
-                self.agree_friend(row)
+                asyncio.ensure_future(self.agree_friend(row))
         QMessageBox.information(self, "完成", "已自动通过选中的好友申请。")
         self.update_statistics()
 
@@ -183,20 +238,6 @@ class FriendManagementTab(QWidget):
             self.reply_text = config["reply_text"]
             self.reply_image = config["reply_image"]
             QMessageBox.information(self, "配置已保存", "好友通过配置已更新。")
-
-    def load_config(self):
-        config_path = os.path.join('configs', 'config.json')
-        with open(config_path, 'r') as f:
-            self.config = json.load(f)
-
-    async def fetch_new_requests(self):
-        print("Checking for new friend requests...")
-        return
-        # TODO: Implement the logic to fetch new requests
-        # This example adds a dummy request - replace it with your actual fetch logic
-        new_requests = [("account1", "friend_account1", "remark1"), ("account2", "friend_account2", "remark2")]
-        for account, friend_account, remark in new_requests:
-            self.add_friend_request(account, friend_account, remark)
 
     async def auto_reply_to_friends(self):
         return
