@@ -1,4 +1,3 @@
-from BasicDefine import *
 from Layout.GroupMessageConfig import *
 
 
@@ -7,31 +6,46 @@ class GroupManagementTab(QWidget):
         super().__init__()
         self.initUI()
         self.module_messages = {}  # 存储各模块的消息内容
+        self.modules = ["模块1", "模块2", "模块3"]  # 预留模块名称
+        self.updateModuleButtons()
 
     def initUI(self):
         layout = QHBoxLayout(self)
 
-        # 左侧模块按钮区域
-        modules_layout = QVBoxLayout()
-        self.modules = ["模块1", "模块2", "模块3"]  # 预留模块名称
-        self.module_buttons = {}
-        for module in self.modules:
-            btn_layout = QHBoxLayout()
-            btn = QPushButton(module)
-            btn.setIcon(QIcon("icons/module.png"))
-            btn.clicked.connect(lambda checked, m=module: self.select_module(m))
-            settings_btn = QPushButton("...")
-            settings_btn.setFixedSize(20, 20)
-            settings_btn.setIcon(QIcon("icons/settings.png"))
-            settings_btn.clicked.connect(lambda checked, m=module: self.configure_module(m))
-            btn_layout.addWidget(btn)
-            btn_layout.addWidget(settings_btn)
-            btn_layout.addStretch()
-            modules_layout.addLayout(btn_layout)
-            self.module_buttons[module] = btn
+        # 滚动区域
+        scroll_area = QScrollArea(self)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area_widget = QWidget(scroll_area)
 
-        modules_layout.addStretch()
-        layout.addLayout(modules_layout)
+        # 模块布局设置
+        self.modules_layout = QVBoxLayout(scroll_area_widget)
+        self.modules_layout.setSpacing(10)  # 设置模块之间的固定间距
+
+        # 添加模块按钮
+        add_module_button = QPushButton("+")
+        add_module_button.setFixedSize(30, 30)
+        add_module_button.setStyleSheet("""
+            QPushButton {
+                background-color: #FF0000;  # Bright red color
+                color: white;
+                font-weight: bold;
+                border-radius: 15px;
+            }
+            QPushButton:hover {
+                background-color: #FF3333;  # Lighter red on hover
+            }
+            QPushButton:pressed {
+                background-color: #CC0000;  # Darker red when pressed
+            }
+        """)
+        add_module_button.clicked.connect(self.add_module)
+        self.modules_layout.addWidget(add_module_button, alignment=Qt.AlignCenter)
+
+        scroll_area.setWidget(scroll_area_widget)
+        scroll_area.setFixedWidth(120)  # 设置固定宽度
+        layout.addWidget(scroll_area)
 
         # 右侧群管理内容
         group_management_layout = QVBoxLayout()
@@ -56,11 +70,6 @@ class GroupManagementTab(QWidget):
                 font-weight: bold;
                 margin-top: 10px;
             }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 3px 0 3px;
-            }
         """)
         group_list_layout = QVBoxLayout(group_list_group)
 
@@ -82,20 +91,6 @@ class GroupManagementTab(QWidget):
                 padding: 4px;
                 font-size: 14px;
             }
-            QPushButton {
-                background-color: #FF6347;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                font-size: 12px;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #FF4500;
-            }
-            QPushButton:pressed {
-                background-color: #CD3700;
-            }
         """)
         group_list_layout.addWidget(self.group_list_table)
 
@@ -108,11 +103,6 @@ class GroupManagementTab(QWidget):
                 font-size: 16px;
                 font-weight: bold;
                 margin-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 3px 0 3px;
             }
         """)
         message_layout = QVBoxLayout(message_group)
@@ -156,24 +146,86 @@ class GroupManagementTab(QWidget):
 
         layout.addLayout(group_management_layout)
 
-    def select_module(self, module):
-        # 根据选择的模块加载对应的消息内容
-        message = self.module_messages.get(module, "")
-        self.group_message_input.setPlainText(message)
+    def updateModuleButtons(self):
+        # 清除现有的模块布局项
+        while self.modules_layout.count() > 1:  # 保留添加模块的按钮
+            item = self.modules_layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+
+        # 重新添加模块按钮
+        for module in self.modules:
+            btn = QPushButton(module, self)
+            btn.setFixedSize(80, 80)
+            btn.setIcon(QIcon("icons/module.png"))
+            btn.setIconSize(QSize(40, 40))
+            btn.setStyleSheet("""
+                QPushButton {
+                    border: 1px solid #DDDDDD;
+                    border-radius: 10px;
+                    background-color: #F0F0F0;
+                    margin: 10px 0;  # Add fixed vertical spacing between buttons
+                }
+                QPushButton:hover {
+                    background-color: #E0E0E0;
+                }
+                QPushButton:pressed {
+                    background-color: #D0D0D0;
+                }
+            """)
+            btn.clicked.connect(lambda checked, m=module: self.configure_module(m))
+
+            # 创建关闭按钮，并放置在模块按钮的右上角
+            close_btn = QPushButton("x", btn)
+            close_btn.setFixedSize(16, 16)
+            close_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #FF0000;  # Bright red color
+                    color: white;
+                    border: none;
+                    font-size: 12px;
+                    border-radius: 8px;
+                }
+                QPushButton:hover {
+                    background-color: #FF3333;  # Lighter red on hover
+                }
+                QPushButton:pressed {
+                    background-color: #CC0000;  # Darker red when pressed
+                }
+            """)
+            close_btn.move(btn.width() - close_btn.width(), 0)
+            close_btn.clicked.connect(lambda checked, m=module: self.remove_module(m))
+
+            self.modules_layout.insertWidget(self.modules_layout.count() - 1, btn, alignment=Qt.AlignTop)
 
     def configure_module(self, module):
+        # 弹出配置对话框
         dialog = GroupMessageConfigDialog(self, module)
         if dialog.exec_() == QDialog.Accepted:
             message = dialog.get_message()
             self.module_messages[module] = message
             QMessageBox.information(self, "保存成功", f"{module} 的消息内容已保存。")
 
+    def add_module(self):
+        # 添加新模块逻辑
+        new_module_name = f"新模块{len(self.modules) + 1}"
+        self.modules.append(new_module_name)
+        self.updateModuleButtons()
+        # QMessageBox.information(self, "模块添加", f"{new_module_name} 已添加。")
+
+    def remove_module(self, module):
+        # 移除模块逻辑
+        if module in self.modules:
+            self.modules.remove(module)
+            self.updateModuleButtons()
+
     def send_message_to_groups(self):
-        selected_modules = [m for m, btn in self.module_buttons.items() if btn.isChecked()]
+        selected_modules = [m for m in self.modules]
         for module in selected_modules:
             message = self.module_messages.get(module, "")
             if message:
-                # TODO: Implement sending message to groups based on module
+                # TODO: 实现将消息发送到组的逻辑
                 print(f"发送消息到所有群 - 模块: {module}, 内容: {message}")
             else:
                 QMessageBox.warning(self, "警告", f"模块 {module} 没有配置消息内容。")
