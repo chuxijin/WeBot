@@ -2,14 +2,6 @@ from BasicDefine import *
 from Layout.FriendConfig import *
 
 
-class MySwitchControl(QCheckBox):
-    def setToggle(self, state):
-        self.setChecked(state)
-
-    def isToggled(self):
-        return self.isChecked()
-
-
 class FriendManagementTab(QWidget):
     def __init__(self):
         super().__init__()

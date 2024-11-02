@@ -6,6 +6,7 @@ from Layout.GroupMessageConfig import *
 from Layout.MessageManagement import *
 from Layout.MomentsManagement import *
 from Layout.MomentsContentConfig import *
+from Layout.SendMsgManagement import *
 
 
 class WeChatBotManager(QWidget):
@@ -55,12 +56,14 @@ class WeChatBotManager(QWidget):
         self.friend_tab = FriendManagementTab()
         self.group_tab = GroupManagementTab()
         self.moments_tab = MomentsManagementTab()
+        self.send_tab = SendMsgManagementTab()
 
         self.tabs.addTab(self.account_tab, QIcon("icons/account.png"), "账号管理")
         self.tabs.addTab(self.message_tab, QIcon("icons/message.png"), "消息管理")
         self.tabs.addTab(self.friend_tab, QIcon("icons/friend.png"), "好友管理")
         self.tabs.addTab(self.group_tab, QIcon("icons/group.png"), "群管理")
         self.tabs.addTab(self.moments_tab, QIcon("icons/moments.png"), "朋友圈管理")
+        self.tabs.addTab(self.send_tab, QIcon("icons/send.png"), "发送消息管理")
 
         # Connect account management selection to update other tabs
         self.account_tab.account_table.itemSelectionChanged.connect(self.update_other_tabs)

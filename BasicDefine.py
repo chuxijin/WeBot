@@ -21,7 +21,8 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
     QPushButton, QTableWidget, QTableWidgetItem, QCheckBox, QLabel,
     QTextEdit, QLineEdit, QGroupBox, QFileDialog, QGridLayout,
-    QHeaderView, QMessageBox, QDialog, QScrollArea
+    QHeaderView, QMessageBox, QDialog, QScrollArea, QMenuBar, QMenu,
+    QListWidget, QAction, QTreeWidget, QTreeWidgetItem
 )
 from PyQt5.QtCore import (
     Qt, QDate, pyqtSignal, QTimer, QPropertyAnimation, pyqtProperty, QSize
@@ -41,6 +42,7 @@ __all__ = \
         'QTableWidgetItem', 'QCheckBox', 'QLabel', 'QTextEdit', 'QLineEdit', 'QGroupBox', 'QFileDialog', 'QGridLayout',
         'QHeaderView', 'QMessageBox', 'Qt', 'QDate', 'QIcon', 'QDragEnterEvent', 'QDropEvent', 'QPixmap', 'QFont',
         'pyqtSignal', 'QColor', 'QTimer', 'QPaintEvent', 'QPainter', 'QMouseEvent', 'QResizeEvent',
-        'QPropertyAnimation', 'pyqtProperty', 'QSize', 'QScrollArea'
+        'QPropertyAnimation', 'pyqtProperty', 'QSize', 'QScrollArea', 'QMenuBar', 'QMenu', 'QListWidget', 'QAction',
+        'QTreeWidget', 'QTreeWidgetItem'
     ]
 
