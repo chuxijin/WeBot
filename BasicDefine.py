@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import (
     QHeaderView, QMessageBox, QDialog
 )
 from PyQt5.QtCore import (
-    Qt, QDate, pyqtSignal, QTimer
+    Qt, QDate, pyqtSignal, QTimer, QPropertyAnimation, pyqtProperty
 )
 from PyQt5.QtGui import (
     QIcon, QDragEnterEvent, QDropEvent, QPixmap, QFont, QColor,
@@ -29,7 +29,8 @@ __all__ = \
         'QApplication', 'QWidget', 'QVBoxLayout', 'QHBoxLayout', 'QTableWidget', 'QPushButton', 'QTabWidget', 'QDialog',
         'QTableWidgetItem', 'QCheckBox', 'QLabel', 'QTextEdit', 'QLineEdit', 'QGroupBox', 'QFileDialog', 'QGridLayout',
         'QHeaderView', 'QMessageBox', 'Qt', 'QDate', 'QIcon', 'QDragEnterEvent', 'QDropEvent', 'QPixmap', 'QFont',
-        'pyqtSignal', 'QColor', 'QTimer', 'QPaintEvent', 'QPainter', 'QMouseEvent', 'QResizeEvent'
+        'pyqtSignal', 'QColor', 'QTimer', 'QPaintEvent', 'QPainter', 'QMouseEvent', 'QResizeEvent',
+        'QPropertyAnimation', 'pyqtProperty'
     ]
 
 # ***************************************************************************************************

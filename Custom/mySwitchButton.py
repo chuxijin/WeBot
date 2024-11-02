@@ -12,13 +12,11 @@ class MySwitchControl(QWidget):
         self.checked_color = QColor(51, 255, 51)
         self.disabled_color = QColor(190, 190, 190)
         self.thumb_color = QColor(Qt.white)
-        self.radius = 15.0
+        self.radius = self.height() / 2
         self.margin = 2
         self.thumb_position = self.margin
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.animate)
-        self.animation_direction = 1  # 1 for right, -1 for left
-        self.animation_speed = 2
+        self.animation = QPropertyAnimation(self, b"thumbPosition")
+        self.animation.setDuration(200)
 
     def isToggled(self):
         return self.checked
@@ -26,8 +24,24 @@ class MySwitchControl(QWidget):
     def setToggle(self, checked):
         if self.checked != checked:
             self.checked = checked
-            self.animation_direction = 1 if self.checked else -1
-            self.timer.start(10)
+            self.toggle_animation()
+
+    def toggle_animation(self):
+        start_position = self.thumb_position
+        end_position = self.width() - self.height() + self.margin if self.checked else self.margin
+        self.animation.stop()
+        self.animation.setStartValue(start_position)
+        self.animation.setEndValue(end_position)
+        self.animation.start()
+
+    def getThumbPosition(self):
+        return self.thumb_position
+
+    def setThumbPosition(self, pos):
+        self.thumb_position = pos
+        self.update()
+
+    thumbPosition = pyqtProperty(int, fget=getThumbPosition, fset=setThumbPosition)
 
     def setBackgroundColor(self, color):
         self.background_color = color
@@ -45,63 +59,26 @@ class MySwitchControl(QWidget):
         self.thumb_color = color
         self.update()
 
-    def setStateText(self, text):
-        self.state_text = text
-        self.update()
-
-    def paintEvent(self, event: QPaintEvent):
+    def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
         # Background
-        if self.isEnabled():
-            bg_color = self.checked_color if self.checked else self.background_color
-        else:
-            bg_color = self.disabled_color
-
+        bg_color = self.checked_color if self.checked else self.background_color
         painter.setBrush(bg_color)
         painter.setPen(Qt.NoPen)
         painter.drawRoundedRect(self.rect(), self.radius, self.radius)
 
         # Thumb
-        thumb_color = self.thumb_color
-        painter.setBrush(thumb_color)
-        painter.drawEllipse(self.thumb_position, self.margin, self.height() - 2 * self.margin,
-                            self.height() - 2 * self.margin)
+        thumb_rect = self.height() - 2 * self.margin
+        painter.setBrush(self.thumb_color)
+        painter.drawEllipse(self.thumb_position, self.margin, thumb_rect, thumb_rect)
 
-    def mousePressEvent(self, event: QMouseEvent):
-        if self.isEnabled() and event.button() == Qt.LeftButton:
-            event.accept()
-        else:
-            event.ignore()
-
-    def mouseReleaseEvent(self, event: QMouseEvent):
+    def mousePressEvent(self, event):
         if self.isEnabled() and event.button() == Qt.LeftButton:
             self.checked = not self.checked
+            self.toggle_animation()
             self.toggled.emit(self.checked)
-            self.update()
             event.accept()
         else:
             event.ignore()
-
-    def animate(self):
-        if self.animation_direction == 1:
-            if self.thumb_position < self.width() - self.height():
-                self.thumb_position += self.animation_speed
-                self.update()
-            else:
-                self.timer.stop()
-        else:
-            if self.thumb_position > self.margin:
-                self.thumb_position -= self.animation_speed
-                self.update()
-            else:
-                self.timer.stop()
-
-    def resizeEvent(self, event: QResizeEvent):
-        self.radius = self.height() / 2
-        self.thumb_position = self.margin if not self.checked else self.width() - self.height() + self.margin
-        super().resizeEvent(event)
-
-    def sizeHint(self):
-        return self.size()
