@@ -1,10 +1,14 @@
 from BasicDefine import *
+CONFIG_FILE = os.path.join('configs', 'config.json')
 
 
 class AccountManagementTab(QWidget):
     def __init__(self):
         super().__init__()
+        self.accounts_data = []  # List to store account information
+        self.load_accounts_from_config()
         self.initUI()
+        self.login_all_accounts()
 
     def initUI(self):
         layout = QVBoxLayout(self)
@@ -83,18 +87,62 @@ class AccountManagementTab(QWidget):
 
         layout.addLayout(button_layout)
 
+        self.update_table()
+
     # Slot functions
     def add_account(self):
-        pass  # Implement account addition logic
+        # Placeholder logic to add a new account; implement actual logic here
+        new_account = {'account': 'new_user', 'wx_name': 'new_weixin', 'port': '5678'}
+        self.accounts_data.append(new_account)
+        self.update_config_file()
+        self.update_table()
 
     def remove_account(self):
-        pass  # Implement account removal logic
+        selected_rows = set(item.row() for item in self.account_table.selectedItems())
+        for row in sorted(selected_rows, reverse=True):
+            self.accounts_data.pop(row)
+        self.update_config_file()
+        self.update_table()
 
     def login_selected_accounts(self):
-        pass  # Implement login logic for selected accounts
+        selected_rows = set(item.row() for item in self.account_table.selectedItems())
+        for row in selected_rows:
+            account = self.accounts_data[row]
+            print(f"Logging in account: {account['account']} on port: {account['port']}")
+            # Implement API call to log in account here
+
+    def login_all_accounts(self):
+        for account in self.accounts_data:
+            print(f"Logging in account: {account['account']} on port: {account['port']}")
+            # Implement API call to log in account here
+            # 暂不实现
 
     def select_all_accounts(self, state):
         if state == Qt.Checked:
             self.account_table.selectAll()
         else:
             self.account_table.clearSelection()
+
+    def load_accounts_from_config(self):
+        if os.path.exists(CONFIG_FILE):
+            with open(CONFIG_FILE, 'r') as file:
+                config_data = json.load(file)
+                self.accounts_data = config_data.get('accounts', [])
+
+    def update_config_file(self):
+        if os.path.exists(CONFIG_FILE):
+            with open(CONFIG_FILE, 'r') as file:
+                config_data = json.load(file)
+        else:
+            config_data = {}
+
+        config_data['accounts'] = self.accounts_data
+        with open(CONFIG_FILE, 'w') as file:
+            json.dump(config_data, file, indent=4)
+
+    def update_table(self):
+        self.account_table.setRowCount(len(self.accounts_data))
+        for row, account in enumerate(self.accounts_data):
+            self.account_table.setItem(row, 0, QTableWidgetItem(account['account']))
+            self.account_table.setItem(row, 1, QTableWidgetItem(account['wx_name']))
+            self.account_table.setItem(row, 2, QTableWidgetItem(account['port']))

@@ -1,8 +1,12 @@
 {
-    "reply_interval_seconds": 5,
-    "fetch_interval_seconds": 10,
-    "keyword_responses": {
-        "hello": "Hi! How can I help you?",
-        "bye": "Goodbye! See you next time!"
-    }
+  "reply_interval_seconds": 5,
+  "fetch_interval_seconds": 10,
+  "keyword_responses": {
+    "hello": "Hi! How can I help you?",
+    "bye": "Goodbye! See you next time!"
+  },
+  "accounts": [
+    {"account": "user1", "wx_name": "weixin1", "port": "1234"},
+    {"account": "user2", "wx_name": "weixin2", "port": "2345"}
+  ]
 }
