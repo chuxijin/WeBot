@@ -40,3 +40,21 @@ def send_image_msg(userName, filePath):
     }
     data = public_request(request_data)
     print(data)
+
+
+def send_file_msg(userName, filePath):
+    """
+    参数名	            必选	类型	        说明
+    type	            是	int	        接口编号
+    userName	        是	string	    接收人wxid
+    filePath	        是	string	    文件绝对路径
+    bAsync	            否	bool	    如果将该参数设置为true，则任务不再阻塞，接口响应内容会通过消息处理器返回，消息推送类型为0<br/>如果提供了asyncUserData参数，会随调用结果一起推送
+    asyncUserData	    否	str	        xxxx
+    """
+    request_data = {
+        "type": 10012,
+        "userName": userName,
+        "filePath": filePath
+    }
+    data = public_request(request_data)
+    print(data)
