@@ -1,5 +1,6 @@
 # 通讯录API
 from api.public_api import *
+from BasicDefine import *
 
 
 # 获取通讯录
@@ -36,4 +37,26 @@ def pass_friend_request(encryptUserName, ticket, scene=None):
             "ticket": ticket,
             "scene": scene
         }
+    parsed_data = public_request(request_data)
+
+
+# 设置备注
+def set_other_name(old_name, new_name):
+    """
+    参数名	    必选	类型	    说明
+    type	    是	int	    接口编号
+    userName	是	string	用户wxid
+    remark	    是	string	备注信息
+    """
+    if not new_name:
+        # 获取当前日期
+        current_date = datetime.now()
+
+        # 格式化日期为指定格式并转换为字符串
+        new_name = old_name + current_date.strftime('%y%m%d')
+    request_data = {
+        "type": 10013,
+        "userName": old_name,
+        "remark": new_name
+    }
     parsed_data = public_request(request_data)
