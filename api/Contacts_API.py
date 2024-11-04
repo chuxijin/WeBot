@@ -60,3 +60,22 @@ def set_other_name(old_name, new_name):
         "remark": new_name
     }
     parsed_data = public_request(request_data)
+
+
+# 获取用户信息 *特别重要* 获取到api实际返回，可以将上面的接口改写成传user_name！
+def get_user_info(userName):
+    """
+    参数名	            必选	类型	            说明
+    type	            是	int	            接口编号
+    userName	        是	string, list	用户wxid或wxid列表
+    chatroomUserName	否	string	        群聊wxid，如果指定了此参数，将会通过群聊获取目标用户信息
+    """
+    request_data = {
+        "type": 10015,
+        "userName": userName
+    }
+    parsed_data = public_request(request_data)
+    status = parsed_data.get('status', None)
+    desc = parsed_data.get('desc', None)
+    data = parsed_data.get('data', [])
+    return data
