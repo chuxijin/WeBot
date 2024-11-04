@@ -79,3 +79,59 @@ def get_user_info(userName):
     desc = parsed_data.get('desc', None)
     data = parsed_data.get('data', [])
     return data
+
+
+# 获取所有好友列表
+def get_all_list():
+    """
+    type	        是	int	    接口编号
+    dbName	        否	string	数据库名称，优先级低于dbHandle
+    dbHandle	    否	int	    数据库句柄，优先级高于dbName
+    sql	            是	string	sql
+    """
+    """
+    获取所有好友列表，以及所有群里的好友列表
+    {
+     "type": 10058,
+     "dbName": "MicroMsg.db",
+     "sql": "SELECT chl.smallHeadImgUrl, c.UserName, c.Remark, c.nickName FROM Contact c LEFT JOIN ContactHeadImgUrl chl ON c.UserName = chl.usrName;"
+    }
+    
+    只获取通讯录好友列表
+    {
+    "type": 10058,
+    "dbName": "MicroMsg.db",
+    "sql": "SELECT UserName,Remark,NickName,PYInitial,RemarkPYInitial,t2.smallHeadImgUrl FROM Contact t1 LEFT JOIN ContactHeadImgUrl t2 ON t1.UserName = t2.usrName WHERE t1.VerifyFlag = 0 AND (t1.Type = 3 OR t1.Type > 50) and t1.Type != 2050 AND t1.UserName NOT IN ('qmessage', 'tmessage') ORDER BY t1.Remark DESC;"
+    }
+    
+    只获取群
+    {
+    "type": 10058,
+    "dbName": "MicroMsg.db",
+    "sql": "SELECT UserName,Remark, NickName,PYInitial,RemarkPYInitial FROM Contact t1 WHERE t1.Type in(2,2050);"
+    }
+    
+    判断群聊是否是企业群
+    {
+    "type": 10058,
+    "dbName": "MicroMsg.db",
+    "sql": "SELECT UserName,Remark, NickName,PYInitial,RemarkPYInitial FROM Contact t1 WHERE t1.Type = 2050 and t1.UserName='xxxx@chatroom';"
+    }
+    
+    获取企业群中的昵称
+    {
+    "type": 10058,
+    "dbName": "OpenIMContact.db",
+    "sql": "SELECT Remark, NickName FROM OpenIMContact t1 where UserName = 'xxxxx@openim'"
+    }
+    """
+    request_data = {
+        "type": 10058,
+        "dbName": "MicroMsg.db",
+        "sql": "SELECT chl.smallHeadImgUrl, c.UserName, c.Remark, c.nickName FROM Contact c LEFT JOIN ContactHeadImgUrl chl ON c.UserName = chl.usrName;"
+    }
+    parsed_data = public_request(request_data)
+    status = parsed_data.get('status', None)
+    desc = parsed_data.get('desc', None)
+    data = parsed_data.get('data', [])
+    return data
