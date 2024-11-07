@@ -17,6 +17,13 @@ import aiohttp
 import hashlib
 from PIL import Image
 from datetime import datetime
+import random
+import re
+import time
+
+import requests
+import xmltodict
+from flask import Flask, request, jsonify
 import mimetypes
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
@@ -38,6 +45,7 @@ __all__ = \
     [
         # 系统库
         'sys', 'json', 'os', 'time', 'requests', 'asyncio', 'aiohttp', 'hashlib', 'Image', 'mimetypes', 'datetime',
+        'random', 're', 'xmltodict', 'Flask', 'request', 'jsonify',
         # Qt库
         'QApplication', 'QWidget', 'QVBoxLayout', 'QHBoxLayout', 'QTableWidget', 'QPushButton', 'QTabWidget', 'QDialog',
         'QTableWidgetItem', 'QCheckBox', 'QLabel', 'QTextEdit', 'QLineEdit', 'QGroupBox', 'QFileDialog', 'QGridLayout',
