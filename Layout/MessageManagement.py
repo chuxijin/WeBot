@@ -1,4 +1,5 @@
 from BasicDefine import *
+from Handle_Server import *
 
 
 class MessageManagementTab(QWidget):
@@ -10,319 +11,341 @@ class MessageManagementTab(QWidget):
         self.initUI()
         self.load_auto_reply_config()
         self.load_auto_reply_config()
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_pending_messages)
+        self.timer.start(5000)
 
     def initUI(self):
-        layout = QVBoxLayout(self)
+            layout = QVBoxLayout(self)
 
-        # Auto-reply group
-        auto_reply_group = QGroupBox("关键字自动回复")
-        auto_reply_group.setStyleSheet("""
-            QGroupBox {
-                font-size: 16px;
-                font-weight: bold;
-                margin-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 3px 0 3px;
-            }
-        """)
-        auto_reply_layout = QVBoxLayout(auto_reply_group)
+            # Auto-reply group
+            auto_reply_group = QGroupBox("关键字自动回复")
+            auto_reply_group.setStyleSheet("""
+                QGroupBox {
+                    font-size: 16px;
+                    font-weight: bold;
+                    margin-top: 10px;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 3px 0 3px;
+                }
+            """)
+            auto_reply_layout = QVBoxLayout(auto_reply_group)
 
-        self.auto_reply_list = QTableWidget()
-        self.auto_reply_list.setColumnCount(4)
-        self.auto_reply_list.setHorizontalHeaderLabels(["账号", "关键字", "回复内容", "操作"])
-        self.auto_reply_list.horizontalHeader().setStretchLastSection(True)
-        self.auto_reply_list.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.auto_reply_list.setStyleSheet("""
-            QTableWidget {
-                background-color: #F0F8FF;
-                alternate-background-color: #E6F2FF;
-                gridline-color: #ADD8E6;
-                selection-background-color: #87CEFA;
-            }
-            QHeaderView::section {
-                background-color: #4682B4;
-                color: white;
-                padding: 4px;
-                font-size: 14px;
-            }
-            QPushButton {
-                background-color: #4682B4;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                font-size: 12px;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #5A9BD4;
-            }
-            QPushButton:pressed {
-                background-color: #3A78C2;
-            }
-        """)
-        auto_reply_layout.addWidget(self.auto_reply_list)
+            self.auto_reply_list = QTableWidget()
+            self.auto_reply_list.setColumnCount(4)
+            self.auto_reply_list.setHorizontalHeaderLabels(["账号", "关键字", "回复内容", "操作"])
+            self.auto_reply_list.horizontalHeader().setStretchLastSection(True)
+            self.auto_reply_list.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+            self.auto_reply_list.setStyleSheet("""
+                QTableWidget {
+                    background-color: #F0F8FF;
+                    alternate-background-color: #E6F2FF;
+                    gridline-color: #ADD8E6;
+                    selection-background-color: #87CEFA;
+                }
+                QHeaderView::section {
+                    background-color: #4682B4;
+                    color: white;
+                    padding: 4px;
+                    font-size: 14px;
+                }
+                QPushButton {
+                    background-color: #4682B4;
+                    color: white;
+                    border: none;
+                    padding: 6px 12px;
+                    font-size: 12px;
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #5A9BD4;
+                }
+                QPushButton:pressed {
+                    background-color: #3A78C2;
+                }
+            """)
+            auto_reply_layout.addWidget(self.auto_reply_list)
 
-        # Buttons for auto-reply
-        auto_reply_buttons = QHBoxLayout()
-        self.add_reply_button = QPushButton("添加规则")
-        self.add_reply_button.setIcon(QIcon("icons/add.png"))
-        self.remove_reply_button = QPushButton("删除规则")
-        self.remove_reply_button.setIcon(QIcon("icons/delete.png"))
-        self.save_reply_button = QPushButton("保存配置")
-        self.save_reply_button.setIcon(QIcon("icons/save.png"))
+            # Buttons for auto-reply
+            auto_reply_buttons = QHBoxLayout()
+            self.add_reply_button = QPushButton("添加规则")
+            self.add_reply_button.setIcon(QIcon("icons/add.png"))
+            self.remove_reply_button = QPushButton("删除规则")
+            self.remove_reply_button.setIcon(QIcon("icons/delete.png"))
+            self.save_reply_button = QPushButton("保存配置")
+            self.save_reply_button.setIcon(QIcon("icons/save.png"))
 
-        # self.add_reply_button.clicked.connect(self.add_auto_reply)
-        # self.remove_reply_button.clicked.connect(self.remove_auto_reply)
-        # self.save_reply_button.clicked.connect(self.save_auto_reply)
+            # self.add_reply_button.clicked.connect(self.add_auto_reply)
+            # self.remove_reply_button.clicked.connect(self.remove_auto_reply)
+            # self.save_reply_button.clicked.connect(self.save_auto_reply)
 
-        # Style buttons
-        button_style = """
-            QPushButton {
-                background-color: #32CD32;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                font-size: 14px;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #3CB371;
-            }
-            QPushButton:pressed {
-                background-color: #2E8B57;
-            }
-        """
-        self.add_reply_button.setStyleSheet(button_style)
-        self.remove_reply_button.setStyleSheet(button_style)
-        self.save_reply_button.setStyleSheet(button_style)
+            # Style buttons
+            button_style = """
+                QPushButton {
+                    background-color: #32CD32;
+                    color: white;
+                    border: none;
+                    padding: 8px 16px;
+                    font-size: 14px;
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #3CB371;
+                }
+                QPushButton:pressed {
+                    background-color: #2E8B57;
+                }
+            """
+            self.add_reply_button.setStyleSheet(button_style)
+            self.remove_reply_button.setStyleSheet(button_style)
+            self.save_reply_button.setStyleSheet(button_style)
 
-        auto_reply_buttons.addWidget(self.add_reply_button)
-        auto_reply_buttons.addWidget(self.remove_reply_button)
-        auto_reply_buttons.addWidget(self.save_reply_button)
-        auto_reply_buttons.addStretch()
+            auto_reply_buttons.addWidget(self.add_reply_button)
+            auto_reply_buttons.addWidget(self.remove_reply_button)
+            auto_reply_buttons.addWidget(self.save_reply_button)
+            auto_reply_buttons.addStretch()
 
-        auto_reply_layout.addLayout(auto_reply_buttons)
+            auto_reply_layout.addLayout(auto_reply_buttons)
 
-        layout.addWidget(auto_reply_group)
+            layout.addWidget(auto_reply_group)
 
-        # External Auto-reply Type
-        external_reply_group = QGroupBox("外部接口关键字自动回复")
-        external_reply_group.setStyleSheet("""
-            QGroupBox {
-                font-size: 16px;
-                font-weight: bold;
-                margin-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 3px 0 3px;
-            }
-        """)
-        external_reply_layout = QVBoxLayout(external_reply_group)
+            # External Auto-reply Type
+            external_reply_group = QGroupBox("外部接口关键字自动回复")
+            external_reply_group.setStyleSheet("""
+                QGroupBox {
+                    font-size: 16px;
+                    font-weight: bold;
+                    margin-top: 10px;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 3px 0 3px;
+                }
+            """)
+            external_reply_layout = QVBoxLayout(external_reply_group)
 
-        self.external_reply_list = QTableWidget()
-        self.external_reply_list.setColumnCount(5)
-        self.external_reply_list.setHorizontalHeaderLabels(["账号", "关键字", "模式", "调用接口", "操作"])
-        self.external_reply_list.horizontalHeader().setStretchLastSection(True)
-        self.external_reply_list.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.external_reply_list.setStyleSheet("""
-            QTableWidget {
-                background-color: #E6E6FA;
-                alternate-background-color: #D8BFD8;
-                gridline-color: #DDA0DD;
-                selection-background-color: #BA55D3;
-            }
-            QHeaderView::section {
-                background-color: #800080;
-                color: white;
-                padding: 4px;
-                font-size: 14px;
-            }
-            QPushButton {
-                background-color: #800080;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                font-size: 12px;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #9932CC;
-            }
-            QPushButton:pressed {
-                background-color: #8A2BE2;
-            }
-        """)
-        external_reply_layout.addWidget(self.external_reply_list)
+            self.external_reply_list = QTableWidget()
+            self.external_reply_list.setColumnCount(5)
+            self.external_reply_list.setHorizontalHeaderLabels(["账号", "关键字", "模式", "调用接口", "操作"])
+            self.external_reply_list.horizontalHeader().setStretchLastSection(True)
+            self.external_reply_list.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+            self.external_reply_list.setStyleSheet("""
+                QTableWidget {
+                    background-color: #E6E6FA;
+                    alternate-background-color: #D8BFD8;
+                    gridline-color: #DDA0DD;
+                    selection-background-color: #BA55D3;
+                }
+                QHeaderView::section {
+                    background-color: #800080;
+                    color: white;
+                    padding: 4px;
+                    font-size: 14px;
+                }
+                QPushButton {
+                    background-color: #800080;
+                    color: white;
+                    border: none;
+                    padding: 6px 12px;
+                    font-size: 12px;
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #9932CC;
+                }
+                QPushButton:pressed {
+                    background-color: #8A2BE2;
+                }
+            """)
+            external_reply_layout.addWidget(self.external_reply_list)
 
-        # Buttons for external auto-reply
-        external_reply_buttons = QHBoxLayout()
-        self.add_external_reply_button = QPushButton("添加外部规则")
-        self.add_external_reply_button.setIcon(QIcon("icons/add.png"))
-        self.remove_external_reply_button = QPushButton("删除外部规则")
-        self.remove_external_reply_button.setIcon(QIcon("icons/delete.png"))
-        self.save_external_reply_button = QPushButton("保存外部配置")
-        self.save_external_reply_button.setIcon(QIcon("icons/save.png"))
+            # Buttons for external auto-reply
+            external_reply_buttons = QHBoxLayout()
+            self.add_external_reply_button = QPushButton("添加外部规则")
+            self.add_external_reply_button.setIcon(QIcon("icons/add.png"))
+            self.remove_external_reply_button = QPushButton("删除外部规则")
+            self.remove_external_reply_button.setIcon(QIcon("icons/delete.png"))
+            self.save_external_reply_button = QPushButton("保存外部配置")
+            self.save_external_reply_button.setIcon(QIcon("icons/save.png"))
 
-        # self.add_external_reply_button.clicked.connect(self.add_external_auto_reply)
-        # self.remove_external_reply_button.clicked.connect(self.remove_external_auto_reply)
-        # self.save_external_reply_button.clicked.connect(self.save_external_auto_reply)
+            # self.add_external_reply_button.clicked.connect(self.add_external_auto_reply)
+            # self.remove_external_reply_button.clicked.connect(self.remove_external_auto_reply)
+            # self.save_external_reply_button.clicked.connect(self.save_external_auto_reply)
 
-        # Style buttons
-        external_button_style = """
-            QPushButton {
-                background-color: #6A5ACD;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                font-size: 14px;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #7B68EE;
-            }
-            QPushButton:pressed {
-                background-color: #483D8B;
-            }
-        """
-        self.add_external_reply_button.setStyleSheet(external_button_style)
-        self.remove_external_reply_button.setStyleSheet(external_button_style)
-        self.save_external_reply_button.setStyleSheet(external_button_style)
+            # Style buttons
+            external_button_style = """
+                QPushButton {
+                    background-color: #6A5ACD;
+                    color: white;
+                    border: none;
+                    padding: 8px 16px;
+                    font-size: 14px;
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #7B68EE;
+                }
+                QPushButton:pressed {
+                    background-color: #483D8B;
+                }
+            """
+            self.add_external_reply_button.setStyleSheet(external_button_style)
+            self.remove_external_reply_button.setStyleSheet(external_button_style)
+            self.save_external_reply_button.setStyleSheet(external_button_style)
 
-        external_reply_buttons.addWidget(self.add_external_reply_button)
-        external_reply_buttons.addWidget(self.remove_external_reply_button)
-        external_reply_buttons.addWidget(self.save_external_reply_button)
-        external_reply_buttons.addStretch()
+            external_reply_buttons.addWidget(self.add_external_reply_button)
+            external_reply_buttons.addWidget(self.remove_external_reply_button)
+            external_reply_buttons.addWidget(self.save_external_reply_button)
+            external_reply_buttons.addStretch()
 
-        external_reply_layout.addLayout(external_reply_buttons)
+            external_reply_layout.addLayout(external_reply_buttons)
 
-        external_reply_group.setLayout(external_reply_layout)
-        layout.addWidget(external_reply_group)
+            external_reply_group.setLayout(external_reply_layout)
+            layout.addWidget(external_reply_group)
 
-        # Log group
-        log_group = QGroupBox("日志记录")
-        log_group.setStyleSheet("""
-            QGroupBox {
-                font-size: 16px;
-                font-weight: bold;
-                margin-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 3px 0 3px;
-            }
-        """)
-        log_layout = QVBoxLayout(log_group)
+            # Log group
+            log_group = QGroupBox("日志记录")
+            log_group.setStyleSheet("""
+                QGroupBox {
+                    font-size: 16px;
+                    font-weight: bold;
+                    margin-top: 10px;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 3px 0 3px;
+                }
+            """)
+            log_layout = QVBoxLayout(log_group)
 
-        self.log_text = QTextEdit()
-        self.log_text.setReadOnly(True)
-        self.log_text.setStyleSheet("""
-            QTextEdit {
-                background-color: #FFFACD;
-                color: #000000;
-                font-size: 14px;
-            }
-        """)
-        log_layout.addWidget(self.log_text)
+            self.log_text = QTextEdit()
+            self.log_text.setReadOnly(True)
+            self.log_text.setStyleSheet("""
+                QTextEdit {
+                    background-color: #FFFACD;
+                    color: #000000;
+                    font-size: 14px;
+                }
+            """)
+            log_layout.addWidget(self.log_text)
 
-        log_group.setLayout(log_layout)
-        layout.addWidget(log_group)
+            log_group.setLayout(log_layout)
+            layout.addWidget(log_group)
 
-        # Pending messages group
-        pending_group = QGroupBox("待处理消息")
-        pending_group.setStyleSheet("""
-            QGroupBox {
-                font-size: 16px;
-                font-weight: bold;
-                margin-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 3px 0 3px;
-            }
-        """)
-        pending_layout = QVBoxLayout(pending_group)
+            # Pending messages group
+            pending_group = QGroupBox("待处理消息")
+            pending_group.setStyleSheet("""
+                QGroupBox {
+                    font-size: 16px;
+                    font-weight: bold;
+                    margin-top: 10px;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 3px 0 3px;
+                }
+            """)
+            pending_layout = QVBoxLayout(pending_group)
 
-        self.pending_messages = QTableWidget()
-        self.pending_messages.setColumnCount(4)
-        self.pending_messages.setHorizontalHeaderLabels(["账号", "发送者", "消息内容", "操作"])
-        self.pending_messages.horizontalHeader().setStretchLastSection(True)
-        self.pending_messages.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.pending_messages.setStyleSheet("""
-            QTableWidget {
-                background-color: #F0FFF0;
-                alternate-background-color: #E0FFE0;
-                gridline-color: #90EE90;
-                selection-background-color: #7CFC00;
-            }
-            QHeaderView::section {
-                background-color: #228B22;
-                color: white;
-                padding: 4px;
-                font-size: 14px;
-            }
-            QPushButton {
-                background-color: #FFA500;
-                color: white;
-                border: none;
-                padding: 4px 8px;
-                font-size: 12px;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #FF8C00;
-            }
-            QPushButton:pressed {
-                background-color: #FF7F50;
-            }
-        """)
+            self.pending_messages = QTableWidget()
+            self.pending_messages.setColumnCount(4)
+            self.pending_messages.setHorizontalHeaderLabels(["账号", "发送者", "消息内容", "操作"])
+            self.pending_messages.horizontalHeader().setStretchLastSection(True)
+            self.pending_messages.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+            self.pending_messages.setStyleSheet("""
+                QTableWidget {
+                    background-color: #F0FFF0;
+                    alternate-background-color: #E0FFE0;
+                    gridline-color: #90EE90;
+                    selection-background-color: #7CFC00;
+                }
+                QHeaderView::section {
+                    background-color: #228B22;
+                    color: white;
+                    padding: 4px;
+                    font-size: 14px;
+                }
+                QPushButton {
+                    background-color: #FFA500;
+                    color: white;
+                    border: none;
+                    padding: 4px 8px;
+                    font-size: 12px;
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #FF8C00;
+                }
+                QPushButton:pressed {
+                    background-color: #FF7F50;
+                }
+            """)
 
-        pending_layout.addWidget(self.pending_messages)
+            pending_layout.addWidget(self.pending_messages)
 
-        # Buttons for pending messages
-        pending_buttons = QHBoxLayout()
-        self.process_message_button = QPushButton("处理选中消息")
-        self.process_message_button.setIcon(QIcon("icons/process.png"))
-        self.refresh_pending_button = QPushButton("刷新待处理消息")
-        self.refresh_pending_button.setIcon(QIcon("icons/refresh.png"))
+            # Buttons for pending messages
+            pending_buttons = QHBoxLayout()
+            self.process_message_button = QPushButton("处理选中消息")
+            self.process_message_button.setIcon(QIcon("icons/process.png"))
+            self.refresh_pending_button = QPushButton("刷新待处理消息")
+            self.refresh_pending_button.setIcon(QIcon("icons/refresh.png"))
 
-        self.process_message_button.clicked.connect(self.process_selected_messages)
-        self.refresh_pending_button.clicked.connect(self.refresh_pending_messages)
+            self.process_message_button.clicked.connect(self.process_selected_messages)
+            self.refresh_pending_button.clicked.connect(self.refresh_pending_messages)
 
-        # Style buttons
-        pending_button_style = """
-            QPushButton {
-                background-color: #FF8C00;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                font-size: 14px;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #FFA500;
-            }
-            QPushButton:pressed {
-                background-color: #FF6EB4;
-            }
-        """
-        self.process_message_button.setStyleSheet(pending_button_style)
-        self.refresh_pending_button.setStyleSheet(pending_button_style)
+            # Style buttons
+            pending_button_style = """
+                QPushButton {
+                    background-color: #FF8C00;
+                    color: white;
+                    border: none;
+                    padding: 8px 16px;
+                    font-size: 14px;
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #FFA500;
+                }
+                QPushButton:pressed {
+                    background-color: #FF6EB4;
+                }
+            """
+            self.process_message_button.setStyleSheet(pending_button_style)
+            self.refresh_pending_button.setStyleSheet(pending_button_style)
 
-        pending_buttons.addWidget(self.process_message_button)
-        pending_buttons.addWidget(self.refresh_pending_button)
-        pending_buttons.addStretch()
+            pending_buttons.addWidget(self.process_message_button)
+            pending_buttons.addWidget(self.refresh_pending_button)
+            pending_buttons.addStretch()
 
-        pending_layout.addLayout(pending_buttons)
+            pending_layout.addLayout(pending_buttons)
 
-        pending_group.setLayout(pending_layout)
-        layout.addWidget(pending_group)
+            pending_group.setLayout(pending_layout)
+            layout.addWidget(pending_group)
+
+    def update_pending_messages(self):
+        """Timer triggered method to update pending messages"""
+        new_messages = fetch_messages()
+        if new_messages:
+            for msg_content in new_messages:
+                self.add_pending_message_row(msg_content)
+
+    def add_pending_message_row(self, msg):
+        """Add a new row in the pending messages table"""
+        row_position = self.pending_messages.rowCount()
+        self.pending_messages.insertRow(row_position)
+        self.pending_messages.setItem(row_position, 0, QTableWidgetItem("账号示例"))
+        self.pending_messages.setItem(row_position, 1, QTableWidgetItem(msg['from']))
+        self.pending_messages.setItem(row_position, 2, QTableWidgetItem(msg['content']))
+        # Add an operation button
+        operation_btn = QPushButton("处理")
+        operation_btn.clicked.connect(lambda: self.handle_pending_message(row_position))
+        self.pending_messages.setCellWidget(row_position, 3, operation_btn)
 
     def load_auto_reply_config(self):
         """加载普通自动回复配置到表格"""

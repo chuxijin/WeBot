@@ -23,7 +23,9 @@ import time
 
 import requests
 import xmltodict
+import threading
 from flask import Flask, request, jsonify
+import copy
 import mimetypes
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
@@ -45,7 +47,7 @@ __all__ = \
     [
         # 系统库
         'sys', 'json', 'os', 'time', 'requests', 'asyncio', 'aiohttp', 'hashlib', 'Image', 'mimetypes', 'datetime',
-        'random', 're', 'xmltodict', 'Flask', 'request', 'jsonify',
+        'random', 're', 'xmltodict', 'Flask', 'request', 'jsonify', 'threading', 'copy',
         # Qt库
         'QApplication', 'QWidget', 'QVBoxLayout', 'QHBoxLayout', 'QTableWidget', 'QPushButton', 'QTabWidget', 'QDialog',
         'QTableWidgetItem', 'QCheckBox', 'QLabel', 'QTextEdit', 'QLineEdit', 'QGroupBox', 'QFileDialog', 'QGridLayout',

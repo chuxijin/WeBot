@@ -7,6 +7,7 @@ from Layout.MessageManagement import *
 from Layout.MomentsManagement import *
 from Layout.MomentsContentConfig import *
 from Layout.SendMsgManagement import *
+import Handle_Server
 
 
 class WeChatBotManager(QWidget):
